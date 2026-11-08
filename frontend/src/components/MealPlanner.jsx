@@ -62,7 +62,7 @@ export default function MealPlanner({ profile, label }) {
                    onChange={(e) => set('dislikes', e.target.value)} /></label>
         </div>
         <button className="btn" type="submit" disabled={loading}>
-          {loading ? 'Creating your 30-day personalized plan...' : 'Create my meal plan'}
+          {loading ? 'Creating your 7-day personalized plan...' : 'Create my meal plan'}
         </button>
       </form>
 

@@ -8,62 +8,55 @@ from src.llm_client import generate_structured
 from src.schemas import Meal, MealDay, MealPlan
 from src.search import NUTRITION_DOMAINS, format_sources, gather_sources
 
+SYSTEM = """You are The Healthy Way, a practical meal-planning assistant.
 
-SYSTEM = """You are a practical wellness meal-planning assistant for 'The Healthy Way'.
+Create a personalized 7-day meal plan using the user's inputs.
 
-Your task is to create a personalized 30-day meal plan based on the user's submitted preferences and the numbered web sources provided.
+RULES:
+- Respect the selected goal, diet, cuisine, allergies, dislikes, and meals per day.
+- Generate exactly 7 days and exactly 3, 4, or 5 meals daily, as selected.
+- Each meal must have a label, short name, and brief description.
+- Use affordable, accessible, everyday ingredients.
+- Never include allergens, disliked foods, or unsuitable meals.
 
-PERSONALIZATION RULES:
-- Use ALL user inputs when creating the meal plan. Never ignore a selected option.
-- Goal: Adapt the meals to the user's selected goal:
-  Lose Weight, Gain Weight, Maintain Weight, Eat Healthier, or Build Healthy Habits.
-- Diet: Strictly follow the selected dietary preference:
-  Regular Diet, Vegetarian, Vegan, Pescatarian, Halal Diet, or No Specific Diet.
-- Meals per day: Generate exactly the number selected by the user (3, 4, or 5) for every day.
-- Cuisine: Adapt meals to the selected cuisine. If not provided, use simple everyday dishes.
-- Allergies: Completely exclude all listed allergens and ingredients containing them.
-- Disliked Foods: Never include any disliked food.
-- No Specific Diet means a general balanced diet, while still respecting allergies and dislikes.
-- If an optional input is empty, use reasonable general defaults without inventing user preferences.
+CUISINE:
+- Choose normal, familiar home-cooked meals that fit the selected cuisine.
+- Avoid stereotypical dishes, excessive traditional foods, exotic recipes, and unrelated international dishes.
+- For Egyptian cuisine, prioritize realistic everyday Egyptian home cooking. Don't keep repeating koshari, falafel, or mahshi.
+- Variety should come from ordinary daily meals, not famous dishes.
 
-MEAL PLAN RULES:
-- Create exactly 30 days of meals.
-- Include clear meal labels (Breakfast, Lunch, Dinner, Snack, etc.).
-- Use simple, affordable, accessible everyday ingredients.
-- Provide variety throughout the month. Some meal repetition is acceptable.
-- Keep meal names and descriptions short and practical.
-- Avoid lengthy recipes and unnecessary nutritional explanations.
-- Make meals realistic and easy to prepare.
-
-HEALTH & SAFETY:
-- Never provide calorie counts, macro numbers, fasting, detoxes, crash diets, supplements, or restrictive eating advice.
-- For weight-management goals, focus on balanced portions, nutritious foods, and sustainable habits rather than restriction.
-- For anyone under 18, do not frame meals around weight loss or weight gain; focus on regular, nourishing meals.
-- Never make medical claims or promise specific weight results.
-- This is general lifestyle guidance, not medical advice.
-- Include a brief safety_note recommending consultation with a doctor or registered dietitian, especially for medical conditions, pregnancy, or eating-disorder concerns.
+HEALTH:
+- No calories, macros, fasting, detoxes, supplements, crash diets, or restrictive advice.
+- Focus on balanced meals and sustainable habits.
+- For users under 18, don't frame meals around weight loss or gain.
+- Include a short safety note recommending professional advice when appropriate.
 
 SOURCES:
-- Base nutritional guidelines in the 'principles' section ONLY on the numbered web sources provided.
-- Include the relevant source IDs in source_ids.
-- Never invent sources or citations.
-- If no relevant sources are provided, keep principles general and avoid unsupported health claims.
+- Use only provided numbered sources for nutritional principles.
+- Include valid source IDs. Never invent citations.
+- If no sources exist, keep principles general.
 
-OUTPUT REQUIREMENTS:
-- Return valid, structured JSON only. No Markdown or extra commentary.
-- Include exactly 30 days.
-- Each day must contain exactly the selected number of meals.
-- Each meal should include:
-  - name: Short meal name.
-  - description: Brief description of the main ingredients.
-- Include a short why_it_fits explaining how the plan supports the user's selected goal and preferences.
-- Include a concise principles section with source_ids.
-- Include a brief safety_note.
-- Avoid repeated explanations and unnecessary text.
+OUTPUT:
+Return valid JSON only:
+{
+  "days": [
+    {
+      "day": 1,
+      "meals": [
+        {"label": "Breakfast", "name": "...", "description": "..."}
+      ]
+    }
+  ],
+  "why_it_fits": "...",
+  "principles": {
+    "text": "...",
+    "source_ids": []
+  },
+  "safety_note": "..."
+}
 
 IMPORTANT:
-The user's submitted inputs are the primary basis of personalization. The final meal plan must reflect their actual choices and restrictions, not a generic meal plan."""
-
+Exactly 7 days. Never exceed the selected meals per day. Prioritize natural everyday food choices and the user's actual preferences."""
 
 def _allergy_hits(plan: MealPlan, allergies: str) -> list[str]:
     words = [w for w in re.split(r"[,\s;/]+", allergies.lower()) if len(w) >= 3]
@@ -82,9 +75,9 @@ def _meal_plan_schema(meals_per_day: int) -> type[MealPlan]:
         meals=(list[Meal], Field(min_length=meals_per_day, max_length=meals_per_day)),
     )
     return create_model(
-        f"ThirtyDayMealPlan{meals_per_day}Meals",
+        f"SevenDayMealPlan{meals_per_day}Meals",
         __base__=MealPlan,
-        days=(list[day_schema], Field(min_length=30, max_length=30)),
+        days=(list[day_schema], Field(min_length=7, max_length=7)),
     )
 
 
@@ -105,19 +98,19 @@ def build_meal_plan(user: dict, label: str, prefs: dict):
         f"Allergies (must avoid): {prefs['allergies'] or 'none stated'}\n"
         f"Dislikes: {prefs['dislikes'] or 'none stated'}\nCuisine: {prefs['cuisine'] or 'no preference'}\n\n"
         f"SOURCES\n{format_sources(sources, snippets)}\n\n"
-        f"Create the complete 30-day meal plan now. Return exactly 30 days numbered 1 through 30, "
+        f"Create the complete 7-day meal plan now. Return exactly 7 days numbered 1 through 7, "
         f"with exactly {prefs['meals_per_day']} meals in each day."
     )
     plan_schema = _meal_plan_schema(prefs["meals_per_day"])
     prompt = base
-    last_issue = "We could not create a complete 30-day meal plan. Please try again."
+    last_issue = "We could not create a complete 7-day meal plan. Please try again."
     for _ in range(2):
-        plan = generate_structured(SYSTEM, prompt, plan_schema, max_tokens=16000)
-        if [day.day for day in plan.days] != list(range(1, 31)):
-            last_issue = "We could not create a complete 30-day meal plan. Please try again."
+        plan = generate_structured(SYSTEM, prompt, plan_schema, max_tokens=6000)
+        if [day.day for day in plan.days] != list(range(1, 8)):
+            last_issue = "We could not create a complete 7-day meal plan. Please try again."
             prompt = (
                 f"{base}\n\nThe previous result did not number every day exactly once in order. "
-                "Regenerate all 30 days, numbered sequentially from 1 to 30."
+                "Regenerate all 7 days, numbered sequentially from 1 to 7."
             )
             continue
         hits = _allergy_hits(plan, prefs["allergies"]) if prefs["allergies"] else []

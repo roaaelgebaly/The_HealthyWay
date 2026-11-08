@@ -2,21 +2,21 @@
 
 **The Healthy Way is a Machine Learning and Agentic AI wellness project.** It combines a machine-learning model for health-profile analysis with AI agents that use a person's preferences and relevant health sources to create personalized meal and activity plans.
 
-Users start with a short health profile and receive a statistical estimate, a plain-language explanation of the factors behind it, and the option to create a 30-day meal plan or a gradual activity plan.
+Users start with a short health profile and receive a statistical estimate, a plain-language explanation of the factors behind it, and the option to create a 7-day meal plan or a gradual activity plan.
 
 The goal is to encourage realistic, supportive everyday habits—not to provide a diagnosis or medical prescription.
 
 ## Machine Learning and Agentic AI
 
 - **Machine Learning model:** The health-category prediction model uses the Random Forest algorithm and achieved **95% accuracy** during model evaluation. SHAP is used to explain which profile factors influenced the prediction.
-- **Agentic AI planning:** The meal- and activity-planning workflows use AI with the user's profile and preferences, search for relevant guidance through Tavily, and produce structured plans with cited sources. The meal-planning agent creates a personalized 30-day plan; the activity-planning agent creates a gradual four-week plan.
+- **Agentic AI planning:** The meal- and activity-planning workflows use AI with the user's profile and preferences, search for relevant guidance through Tavily, and produce structured plans with cited sources. The meal-planning agent creates a personalized 7-day plan; the activity-planning agent creates a gradual four-week plan.
 - **AI-generated explanations:** Groq generates plain-language explanations for model results and structured wellness plans. These outputs are general information, not medical advice.
 
 ## Features
 
 - **Health profile analysis:** Uses the trained Random Forest pipeline to estimate a weight category and show BMI and the factors that most influenced the estimate.
 - **Easy-to-understand explanation:** Turns influential factors into plain-language notes and gentle tips, while clarifying that the result is a statistical estimate rather than a diagnosis.
-- **Personalized meal plan:** Generates a 30-day plan with 3, 4, or 5 meals per day, tailored to the user's goal, diet, cuisine preferences, allergies, and disliked foods.
+- **Personalized meal plan:** Generates a 7-day plan with 3, 4, or 5 meals per day, tailored to the user's goal, diet, cuisine preferences, allergies, and disliked foods.
 - **Gradual activity plan:** Creates a four-week program based on current activity, available time, preferred setting, and any stated limitations.
 - **Health references:** Retrieves guidance from reputable health websites and displays sources alongside generated plans.
 - **Space-inspired, wellness-focused interface:** Provides separate, responsive pages for the health profile, meal planning, and physical activity.

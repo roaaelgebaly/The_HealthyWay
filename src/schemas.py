@@ -35,14 +35,14 @@ class Meal(BaseModel):
 
 
 class MealDay(BaseModel):
-    day: int = Field(ge=1, le=30)
+    day: int = Field(ge=1, le=7)
     meals: list[Meal] = Field(min_length=3, max_length=5)
 
 
 class MealPlan(BaseModel):
     overview: str
     principles: list[Principle] = Field(min_length=1)
-    days: list[MealDay] = Field(min_length=30, max_length=30)
+    days: list[MealDay] = Field(min_length=7, max_length=7)
     safety_note: str
 
 
