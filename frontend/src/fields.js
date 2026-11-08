@@ -21,7 +21,7 @@ export const SECTIONS = [
       { name: 'Height', label: 'Height (meters)', type: 'number', min: 0.5, max: 2.5, step: 0.01, def: 1.65 },
       { name: 'Weight', label: 'Weight (kg)', type: 'number', min: 10, max: 300, step: 0.5, def: 75 },
       { name: 'family_history_with_overweight', label: 'Family history of overweight', type: 'select', options: yn, def: 'yes' },
-      { name: 'SMOKE', label: 'Do you smoke?', type: 'select', options: yn, def: 'no' },
+      { name: 'SMOKE', label: 'Smoking Habits', type: 'select', options: yn, def: 'no' },
     ],
   },
   {
