@@ -1,4 +1,4 @@
-# The Healthy Way 🌿✨
+# The Healthy Way 
 
 **The Healthy Way is a Machine Learning and Agentic AI wellness project.** It combines a machine-learning model for health-profile analysis with AI agents that use a person's preferences and relevant health sources to create personalized meal and activity plans.
 
